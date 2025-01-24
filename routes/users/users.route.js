@@ -9,6 +9,7 @@ const {
   updateUserByUid,
   deleteUser,
   getUserByUid,
+  validateSignature,
 } = require("../../controller/users/users.controller"); // Import user controller functions
 const verifySignature = require("../../middleware/users/users.middleware");
 
@@ -27,6 +28,7 @@ userRoute.get("/uid/:uid", getUserByUid); // GET a user by UID //original withou
 userRoute.post("/", addUser); // POST a new user
 userRoute.patch("/uid/:uid", updateUserByUid); // PUT (update) a user by ID
 userRoute.delete("/:uid", deleteUser); // DELETE a user by ID
+userRoute.post("/validate", verifySignature, validateSignature);
 
 // ==========================
 // Export Router

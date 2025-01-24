@@ -35,17 +35,17 @@ app.use("/api/users", userRoute); // Define routes for user-related API endpoint
 // Database Connection
 // ==========================
 mongoose
-    .connect(MONGOOSE_CONNECT_URI) // Connect to MongoDB
-    .then(() => {
-        console.log("Database connected successfully."); // Log successful connection
-    })
-    .catch((error) => {
-        console.error("Database connection error:", error); // Log connection errors
-    });
+  .connect(MONGOOSE_CONNECT_URI) // Connect to MongoDB
+  .then(() => {
+    console.log("Database connected successfully."); // Log successful connection
+  })
+  .catch((error) => {
+    console.error("Database connection error:", error); // Log connection errors
+  });
 
 // ==========================
 // Server Initialization
 // ==========================
 app.listen(PORT, () => {
-    console.log(`Server is listening on port: ${PORT}`); // Log server start
+  console.log(`Server is listening on port: ${PORT}`); // Log server start
 });

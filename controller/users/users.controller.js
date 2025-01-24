@@ -1,8 +1,12 @@
 // ==========================
 // Model Import
 // ==========================
+const {
+  kmsDecrypt,
+  kmsEncrypt,
+} = require("../../middleware/users/kmsEncryption");
 const UserModel = require("../../model/users/users.model"); // Import the User model
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 // ==========================
 // Controller Functions
@@ -40,16 +44,15 @@ const getUserById = async (req, res) => {
   }
 };
 
-
-
-
-
-
 //Encryption
 const SECRETKEY = "MASTERKEY1234567"; //"50iy9HLNEwdYQEwUq055wcLemjWAf0EH"
 const aesEncryption = (data, key) => {
   try {
-    const cipher = crypto.createCipheriv("aes-128-ecb", Buffer.from(key, "utf8"), null);
+    const cipher = crypto.createCipheriv(
+      "aes-128-ecb",
+      Buffer.from(key, "utf8"),
+      null
+    );
     cipher.setAutoPadding(true);
     let encrypted = cipher.update(data, "utf8", "base64");
     encrypted += cipher.final("base64");
@@ -62,7 +65,11 @@ const aesEncryption = (data, key) => {
 
 const aesDecryption = async (encryptedData, key) => {
   try {
-    const decipher = crypto.createDecipheriv("aes-128-ecb", Buffer.from(key, "utf8"), null);
+    const decipher = crypto.createDecipheriv(
+      "aes-128-ecb",
+      Buffer.from(key, "utf8"),
+      null
+    );
     decipher.setAutoPadding(true);
     let decrypted = decipher.update(encryptedData, "base64", "utf8");
     decrypted += decipher.final("utf8");
@@ -77,7 +84,12 @@ const getUserByUid = async (req, res) => {
   try {
     const { uid } = req.params; // Extract the UID from request parameters
     // Validate UID format
-    if (!uid || typeof uid !== "string" || uid.trim() === "" || !/^[a-zA-Z0-9]+$/.test(uid)) {
+    if (
+      !uid ||
+      typeof uid !== "string" ||
+      uid.trim() === "" ||
+      !/^[a-zA-Z0-9]+$/.test(uid)
+    ) {
       return res.status(400).json({ message: "Invalid UID format" });
     }
     // Fetch the user by UID
@@ -93,11 +105,14 @@ const getUserByUid = async (req, res) => {
       uid: user.uid, // Keep uid as is
     };
     // Iterate over each field in the user object
-    for (const key in user._doc) { // Accessing _doc directly
-      if (user._doc.hasOwnProperty(key) && key !== 'uid') { // Exclude 'uid'
+    for (const key in user._doc) {
+      // Accessing _doc directly
+      if (user._doc.hasOwnProperty(key) && key !== "uid") {
+        // Exclude 'uid'
         // If the field is a string, attempt to decrypt it
-        if (typeof user._doc[key] === 'string') {
-          const decryptedValue = await aesDecryption(user._doc[key], encryptionKey);
+        if (typeof user._doc[key] === "string") {
+          // const decryptedValue = await aesDecryption(user._doc[key], encryptionKey);
+          const decryptedValue = await kmsDecrypt(user._doc[key]);
           combinedResponse[key] = decryptedValue; // Add decrypted value to response
         } else {
           // If not a string, just add the original value
@@ -106,7 +121,10 @@ const getUserByUid = async (req, res) => {
       }
     }
     // Log the final combined response data
-    console.log("Combined response data:", JSON.stringify(combinedResponse, null, 2));
+    console.log(
+      "Combined response data:",
+      JSON.stringify(combinedResponse, null, 2)
+    );
     // Respond with the combined response data
     res.status(200).json(combinedResponse);
   } catch (error) {
@@ -125,7 +143,8 @@ const addUser = async (req, res) => {
       if (key === "uid") {
         encryptedUser[key] = value; // Keep uid as is
       } else if (typeof value === "string") {
-        encryptedUser[key] = aesEncryption(value, encryptionKey); // Encrypt the value
+        // encryptedUser[key] = aesEncryption(value, encryptionKey); // Encrypt the value
+        encryptedUser[key] = await kmsEncrypt(value); // Encrypt the value
       } else {
         encryptedUser[key] = value; // Keep non-string values as is
       }
@@ -159,7 +178,8 @@ const updateUserByUid = async (req, res) => {
       if (key === "uid") {
         user[key] = value; // Keep uid as is
       } else if (typeof value === "string") {
-        user[key] = aesEncryption(value, encryptionKey); // Encrypt the value
+        // user[key] = aesEncryption(value, encryptionKey); // Encrypt the value
+        user[key] = await kmsEncrypt(value); // Encrypt the value
       } else {
         user[key] = value; // Keep non-string values as is
       }
@@ -173,7 +193,6 @@ const updateUserByUid = async (req, res) => {
   }
 };
 //Encryption
-
 
 // Get a user by UID
 // const getUserByUid = async (req, res) => {
@@ -258,6 +277,17 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const validateSignature = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Signature validated successfully" });
+  } catch (error) {
+    console.error("Error verifying signature:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
 // ==========================
 // Export Controller Functions
 // ==========================
@@ -268,4 +298,5 @@ module.exports = {
   addUser,
   updateUserByUid,
   deleteUser,
+  validateSignature
 };
