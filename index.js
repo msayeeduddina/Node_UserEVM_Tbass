@@ -7,14 +7,14 @@ require("dotenv").config(); // Load environment variables from .env file
 // Module Imports
 // ==========================
 const express = require("express"); // Import Express framework
-const mongoose = require("mongoose"); // Import Mongoose for MongoDB interaction
+const db = require("./db"); // Import MySQL database connection ////MYSQL_CODE_MODIFICATION/REPLACEMENT
+// const mongoose = require("mongoose"); // Import Mongoose for MongoDB interaction
 const userRoute = require("./routes/users/users.route"); // Import user routes
 
 // ==========================
 // Configuration
 // ==========================
 const PORT = process.env.PORT || 3000; // Set the port for the server, defaulting to 3000 if not specified
-const MONGOOSE_CONNECT_URI = process.env.MONGOOSE_CONNECT_URI; // MongoDB connection URI
 
 // ==========================
 // Express Application Initialization
@@ -31,17 +31,30 @@ app.use(express.json()); // Middleware to parse JSON request bodies
 // ==========================
 app.use("/api/users", userRoute); // Define routes for user-related API endpoints
 
+//MYSQL_CODE_MODIFICATION/REPLACEMENT
 // ==========================
 // Database Connection
 // ==========================
-mongoose
-  .connect(MONGOOSE_CONNECT_URI) // Connect to MongoDB
+db.query("SELECT 1") // Simple query to test database connection
   .then(() => {
     console.log("Database connected successfully."); // Log successful connection
   })
   .catch((error) => {
     console.error("Database connection error:", error); // Log connection errors
   });
+
+// ==========================
+// Database Connection
+// ==========================
+// const MONGOOSE_CONNECT_URI = process.env.MONGOOSE_CONNECT_URI; // MongoDB connection URI
+// mongoose
+//   .connect(MONGOOSE_CONNECT_URI) // Connect to MongoDB
+//   .then(() => {
+//     console.log("Database connected successfully."); // Log successful connection
+//   })
+//   .catch((error) => {
+//     console.error("Database connection error:", error); // Log connection errors
+//   });
 
 // ==========================
 // Server Initialization
