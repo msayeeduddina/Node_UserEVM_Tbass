@@ -1,0 +1,22 @@
+[ req ]
+    default_bits        = 256
+    distinguished_name  = req_distinguished_name
+    string_mask         = utf8only
+    default_md          = sha256  # Keeping the default hash algorithm
+
+[ req_distinguished_name ]
+    countryName                     = Country Name (2 letter code)
+    countryName_default             = US  # Updated to "US"
+    stateOrProvinceName             = State or Province Name (full name)
+    stateOrProvinceName_default     = California  # Added default state
+    localityName                    = Locality Name (e.g., city)
+    localityName_default            = San Francisco  # Added default city
+    organizationName                = Organization Name (e.g., company)
+    organizationName_default        = TechCorp  # Updated to "TechCorp"
+    organizationalUnitName          = Organizational Unit Name
+    organizationalUnitName_default  = development_team  # Updated default to "development_team"
+    commonName                      = Common Name (e.g., server FQDN or YOUR name)
+    commonName_default              = myapp-tech  # Set a default common name
+    emailAddress                    = Email Address
+    emailAddress_default            = admin@techcorp.com  # Set default email
+
