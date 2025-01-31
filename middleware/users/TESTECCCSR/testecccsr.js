@@ -74,29 +74,30 @@ function runCommand(command) {
 }
 
 async function generateECCKeysAndCSR(type, uid) {
-    if (!type || typeof type !== 'string' || !uid || typeof uid !== 'string') {
-        throw new Error('Invalid type or uid provided for key generation.');
-    }
-    console.log(`Generating ${type} key and CSR for UID: ${uid}...`);    
-    const keyContent = runCommand('openssl ecparam -name prime256v1 -genkey');
-    const tempKeyFile = path.join(__dirname, `${type}_temp_key_${uid}.pem`);    
-    try {
-        fs.writeFileSync(tempKeyFile, keyContent);
-        const csrContent = runCommand(`openssl req -batch -new -sha256 -key ${tempKeyFile} -subj "/CN=example.com"`);
-        const pkcs8Content = runCommand(`openssl pkcs8 -topk8 -nocrypt -in ${tempKeyFile}`);
-        return { 
-            key: keyContent, 
-            user_ecc_csr: csrContent, 
-            user_ecc_key: pkcs8Content 
-        };
-    } catch (error) {
-        console.error(`Error during key/CSR generation for ${type} and UID ${uid}:`, error.message);
-        throw error;
-    } finally {
-        if (fs.existsSync(tempKeyFile)) {
-            fs.unlinkSync(tempKeyFile);
-        }
-    }
+  if (!type || typeof type !== 'string' || !uid || typeof uid !== 'string') {
+      throw new Error('Invalid type or uid provided for key generation.');
+  }
+  console.log(`Generating ${type} key and CSR for UID: ${uid}...`);
+  const keyContent = runCommand('openssl ecparam -name prime256v1 -genkey');
+  const tempKeyFile = path.join(__dirname, `${type}_temp_key_${uid}.pem`);
+  try {
+      fs.writeFileSync(tempKeyFile, keyContent);
+      const configFilePath = path.join(__dirname, "openssl_user.cnf");
+      const csrContent = runCommand(`openssl req -batch -config ${configFilePath} -new -sha256 -key ${tempKeyFile}`);
+      const pkcs8Content = runCommand(`openssl pkcs8 -topk8 -nocrypt -in ${tempKeyFile}`);
+      return {
+          key: keyContent,
+          user_ecc_csr: csrContent,
+          user_ecc_key: pkcs8Content
+      };
+  } catch (error) {
+      console.error(`Error during key/CSR generation for ${type} and UID ${uid}:`, error.message);
+      throw error;
+  } finally {
+      if (fs.existsSync(tempKeyFile)) {
+          fs.unlinkSync(tempKeyFile);
+      }
+  }
 }
 
 (async () => {
