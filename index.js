@@ -10,6 +10,7 @@ const express = require("express"); // Import Express framework
 const db = require("./db"); // Import MySQL database connection ////MYSQL_CODE_MODIFICATION/REPLACEMENT
 // const mongoose = require("mongoose"); // Import Mongoose for MongoDB interaction
 const userRoute = require("./routes/users/users.route"); // Import user routes
+const contractRoute = require("./routes/contracts/contracts.route"); // Import contracts routes
 
 // ==========================
 // Configuration
@@ -30,6 +31,7 @@ app.use(express.json()); // Middleware to parse JSON request bodies
 // Route Definitions
 // ==========================
 app.use("/api/users", userRoute); // Define routes for user-related API endpoints
+app.use("/api/contracts", contractRoute);
 
 //MYSQL_CODE_MODIFICATION/REPLACEMENT
 // ==========================
